@@ -1,0 +1,18 @@
+{
+    "author": "",
+    "name": "@tuleap/plugin-onlyoffice",
+    "homepage": "https://tuleap.org",
+    "license": "",
+    "private": true,
+    "dependencies": {},
+    "devDependencies": {
+      "@tuleap/build-system-configurator": "link:../../lib/frontend/build-system-configurator",
+      "vue": "^2.6.10",
+      "vue-gettext": "^2.1.0"
+    },
+    "scripts": {
+      "build": "webpack --config webpack.prod.js",
+      "watch": "webpack --config webpack.dev.js --watch",
+      "test": "jest"
+    }
+  }

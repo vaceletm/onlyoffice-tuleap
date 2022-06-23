@@ -1,0 +1,63 @@
+<div class="tlp-framed-vertically">
+    <h1 class="tlp-framed-horizontally">
+        {{# dgettext }}tuleap-onlyoffice | ONLYOFFICE Settings{{/ dgettext }}
+    </h1>
+
+        <div class="tlp-framed-horizontally">
+        <form class="tlp-pane" method="post">
+            {{# csrf_token }}
+                {{> csrf_token_input }}
+            {{/ csrf_token }}
+            <div class="tlp-pane-container">
+                <section class="tlp-pane-section">
+                    <div class="tlp-form-element">
+                        <label for="document-server-url" class="tlp-label">
+                            {{# dgettext }}
+                                tuleap-onlyoffice | Document server url
+                            {{/ dgettext }}
+                        </label>
+                        <input
+                            id="document-server-url"
+                            name="document-server-url"
+                            class="tlp-input"
+                            type="string"
+                            min="0"
+                            size="50"
+                            value="{{ documentServerUrl }}"
+                        >
+                        <p class="tlp-text-info">
+                            <i class="far fa-life-ring"></i>
+                            "http(s)://documentserver/"
+                        </p>
+                    </div>
+
+                    <div class="tlp-form-element">
+                        <label for="verify-self-signed-off" class="tlp-label">
+                            {{# dgettext }}
+                                tuleap-onlyoffice | Disable certificate verification (insecure)
+                            {{/ dgettext }}
+                        </label>
+                        <div class="tlp-switch">
+                            <input type="checkbox"
+                                   id="verify-self-signed-off"
+                                   class="tlp-switch-checkbox"
+                                   name="verify-self-signed-off"
+                                   value="1"
+                                   autocomplete="off"
+                                   {{# verifySelfSigned }}checked{{/ verifySelfSigned }}
+                            >
+                            <label for="verify-self-signed-off" class="tlp-switch-button" aria-hidden></label>
+                        </div>
+                    </div>
+
+                    <div class="tlp-pane-section-submit">
+                        <button class="tlp-button-primary" type="submit">
+                            <i class="fa fa-save tlp-button-icon"></i>
+                            {{# dgettext }} tuleap-onlyoffice | Save settings {{/ dgettext }}
+                        </button>
+                    </div>
+                </section>
+            </div>
+        </form>
+    </div>
+<div>
