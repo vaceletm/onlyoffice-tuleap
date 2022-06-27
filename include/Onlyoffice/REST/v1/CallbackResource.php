@@ -99,6 +99,12 @@ class CallbackResource
                     $userId = $users[0];
                 }
 
+                $user = $this->userManager->getUserById($userId);
+                if ($user === null) {
+                    $this->logger->error('Track: user ' . $userId . 'not found');
+                    throw new RestException(400, 'Invalid user');
+                }
+
                 $file = $this->itemFactory->getItemFromDb($fileId);
                 if (empty($file)) {
                     $this->logger->error('Track: file not found: ' . $fileId);
@@ -111,7 +117,7 @@ class CallbackResource
                     $response = $documentService->Request($url);
                     $content = $response->getBody()->getContents();
 
-                    $this->SaveFile($file, $userId, $content);
+                    $this->SaveFile($file, $user, $content);
     
                     $result = 0;
                 } catch (\Exception $exception) {
@@ -128,8 +134,13 @@ class CallbackResource
         return ["error" => $result];
     }
 
-    private function SaveFile($item, $userId, $newContent): void
+    private function SaveFile($item, $user, $newContent): void
     {
+        $permissionManager = \Docman_PermissionsManager::instance($item->getGroupId());
+        if (!$permissionManager->userCanWrite($user, $item->getId())) {
+            throw new \Exception('User does not have enough permissions to write file');
+        }
+
         $docmanPlugin = \PluginManager::instance()->getPluginByName('docman');
         $docmanRoot   = $docmanPlugin->getPluginInfo()->getPropertyValueForName('docman_root');
 
@@ -147,7 +158,7 @@ class CallbackResource
             [
                 'item_id'   => $item->getId(),
                 'number'    => $nextVersionId,
-                'user_id'   => $userId,
+                'user_id'   => $user->getId(),
                 'filename'  => $item->getTitle(),
                 'filesize'  => strlen($newContent),
                 'filetype'  => $item->getType(),

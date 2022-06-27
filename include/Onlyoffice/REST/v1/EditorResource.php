@@ -76,7 +76,7 @@ class EditorResource
 
         $params["documentType"] = $format["type"];
 
-        $params["document"]["url"] = $this->GetDownloadUrl($fileId);
+        $params["document"]["url"] = $this->GetDownloadUrl($fileId, $userId);
         $params["document"]["fileType"] = $fileExtension;
         $params["document"]["key"] = FileUtility::GetKey($file);
         $params["document"]["title"] = $file->getTitle();
@@ -87,16 +87,18 @@ class EditorResource
             "name" => $userName
         ];
 
-        //necessary to do checking file permissions
-        $haveEditPermissions = true;
+        $permissionManager = \Docman_PermissionsManager::instance($file->getGroupId());
 
         $canEdit = isset($format['edit']) && $format['edit'];
 
-        if ($haveEditPermissions && $canEdit) {
+        if ($canEdit && $permissionManager->userCanWrite($user, $fileId)) {
             $params["document"]["permissions"]["edit"] = $haveEditPermissions;
             $params["editorConfig"]["callbackUrl"] = $this->GetCallbackUrl($fileId);
-        } else {
+        } else if ($permissionManager->userCanRead($user, $fileId)) {
             $params["editorConfig"]["mode"] = "view";
+        } else {
+            $this->logger->error("User " . $userId . " does not have permissions for " . $fileId);
+            return ["error" => "Access denied"];
         }
 
         return $params;
@@ -106,12 +108,14 @@ class EditorResource
      * Url for download file directly
      *
      * @param int $fileId - file identifier
+     * @param string $userId - user identifier
      */
-    private function GetDownloadUrl($fileId): string
+    private function GetDownloadUrl($fileId, $userId): string
     {
         $params = [
             'action' => 'download',
-            'fileId' => $fileId
+            'fileId' => $fileId,
+            'userId' => $userId
         ];
 
         $hash = Crypt::GetHash($params);

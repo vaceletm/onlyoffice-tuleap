@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tuleap\Onlyoffice\Controller;
 
 use Docman_ItemFactory;
+use UserManager;
 
 use Laminas\HttpHandlerRunner\Emitter\EmitterInterface;
 use Tuleap\Request\DispatchablePSR15Compatible;
@@ -39,13 +40,15 @@ class DownloadController extends DispatchablePSR15Compatible implements Dispatch
         EmitterInterface $emitter,
         LoggerInterface $logger,
         ResponseFactoryInterface $responseFactory,
-        Docman_ItemFactory $itemFactory
+        Docman_ItemFactory $itemFactory,
+        UserManager $userManager
     ) {
         parent::__construct($emitter);
 
         $this->logger = $logger;
         $this->responseFactory = $responseFactory;
         $this->itemFactory = $itemFactory;
+        $this->userManager = $userManager;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
@@ -73,6 +76,19 @@ class DownloadController extends DispatchablePSR15Compatible implements Dispatch
         if (empty($file)) {
             $this->logger->error('Download handler: file not found: ' . $fileId);
             return $this->responseFactory->createResponse(404);
+        }
+
+        $userId = $hashData->userId;
+        $user = $this->userManager->getUserById($userId);
+        if ($user === null) {
+            $this->logger->error('Download handler: user not found');
+            return $this->responseFactory->createResponse(400);
+        }
+
+        $permissionManager = \Docman_PermissionsManager::instance($file->getGroupId());
+        if (!$permissionManager->userCanRead($user, $fileId)) {
+            $this->logger->error('Download handler: access denied: ' . $fileId);
+            return $this->responseFactory->createResponse(403);
         }
 
         $version = $file->getCurrentVersion();

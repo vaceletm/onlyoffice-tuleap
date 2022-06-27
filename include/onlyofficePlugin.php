@@ -106,7 +106,8 @@ class onlyofficePlugin extends Plugin implements PluginWithConfigKeys
             new SapiStreamEmitter(),
             \BackendLogger::getDefaultLogger(),
             HTTPFactoryBuilder::responseFactory(),
-            new \Docman_ItemFactory()
+            new \Docman_ItemFactory(),
+            \UserManager::instance()
         );
     }
 
