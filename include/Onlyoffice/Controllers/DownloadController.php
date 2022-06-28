@@ -18,6 +18,7 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 use Tuleap\Onlyoffice\Crypt;
+use Tuleap\Onlyoffice\AppConfig;
 
 class DownloadController extends DispatchablePSR15Compatible implements DispatchableWithRequestNoAuthz
 {
@@ -36,12 +37,23 @@ class DownloadController extends DispatchablePSR15Compatible implements Dispatch
      */
     private $itemFactory;
 
+    /**
+     * @var UserManager
+     */
+    private $userManager;
+
+    /**
+     * @var AppConfig
+     */
+    private $appConfig;
+
     public function __construct (
         EmitterInterface $emitter,
         LoggerInterface $logger,
         ResponseFactoryInterface $responseFactory,
         Docman_ItemFactory $itemFactory,
-        UserManager $userManager
+        UserManager $userManager,
+        AppConfig $appConfig
     ) {
         parent::__construct($emitter);
 
@@ -49,6 +61,7 @@ class DownloadController extends DispatchablePSR15Compatible implements Dispatch
         $this->responseFactory = $responseFactory;
         $this->itemFactory = $itemFactory;
         $this->userManager = $userManager;
+        $this->appConfig = $appConfig;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
@@ -71,6 +84,22 @@ class DownloadController extends DispatchablePSR15Compatible implements Dispatch
         $fileId = $hashData->fileId;
 
         $this->logger->debug('Download file: ' . $fileId);
+
+        if (!empty($this->appConfig->GetJwtSecret())) {
+            if (!$request->hasHeader('Authorization')) {
+                $this->logger->error('Download handler: jwt is empty');
+                return $this->responseFactory->createResponse(400);
+            }
+
+            $header = substr($request->getHeader('Authorization')[0], strlen('Bearer '));
+
+            try {
+                $decodedHeader = \Firebase\JWT\JWT::decode($header, new \Firebase\JWT\Key($this->appConfig->GetJwtSecret(), "HS256"));
+            } catch (\UnexpectedValueException $e) {
+                $this->logger->error('Download handler: invalid jwt');
+                return $this->responseFactory->createResponse(400);
+            }
+        }
 
         $file = $this->itemFactory->getItemFromDb($fileId);
         if (empty($file)) {

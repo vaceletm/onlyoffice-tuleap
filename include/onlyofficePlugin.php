@@ -107,7 +107,8 @@ class onlyofficePlugin extends Plugin implements PluginWithConfigKeys
             \BackendLogger::getDefaultLogger(),
             HTTPFactoryBuilder::responseFactory(),
             new \Docman_ItemFactory(),
-            \UserManager::instance()
+            \UserManager::instance(),
+            self::GetAppConfig()
         );
     }
 
