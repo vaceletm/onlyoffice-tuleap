@@ -66,10 +66,11 @@ class CallbackResource
      * @param string $key {@from body} {@type string}
      * @param array $users {@from body} {@type string}
      * @param string $url {@from body} {@type string}
+     * @param string $token {@from body} {@type string}
      *
      * @throws RestException
      */
-    public function track($hash, $status, $key, $users = null, $url = null): array
+    public function track($hash, $status, $key, $users = null, $url = null, $token = null): array
     {
         list($hashData, $error) = Crypt::ReadHash($hash);
         if ($hashData === null) {
@@ -84,6 +85,39 @@ class CallbackResource
         $fileId = $hashData->fileId;
 
         $this->logger->debug('Track for file: ' . $fileId);
+
+        if (!empty($this->appConfig->GetJwtSecret())) {
+            if (!empty($token)) {
+                try {
+                    $payload = \Firebase\JWT\JWT::decode($token, new \Firebase\JWT\Key($this->appConfig->GetJwtSecret(), "HS256"));
+                } catch (\UnexpectedValueException $e) {
+                    $this->logger->error('Track: Invalid jwt in body');
+                    return $this->responseFactory->createResponse(400);
+                }
+            } else {
+                $headers = getallheaders();
+                if (!isset($headers['Authorization'])) {
+                    $this->logger->error('Track: jwt is empty');
+                    return $this->responseFactory->createResponse(400);
+                }
+                
+                $header = substr($headers['Authorization'], strlen('Bearer '));
+
+                try {
+                    $decodedHeader = \Firebase\JWT\JWT::decode($header, new \Firebase\JWT\Key($this->appConfig->GetJwtSecret(), "HS256"));
+
+                    $payload = $decodedHeader->payload;
+                } catch (\UnexpectedValueException $e) {
+                    $this->logger->error('Track: invalid jwt');
+                    return $this->responseFactory->createResponse(400);
+                }
+            }
+
+            $users = isset($payload->users) ? $payload->users : null;
+            $key = $payload->key;
+            $status = $payload->status;
+            $url = isset($payload->url) ? $payload->url : null;
+        }
 
         $result = 1;
         switch ($status) {
