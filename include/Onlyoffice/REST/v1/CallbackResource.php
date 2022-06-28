@@ -99,6 +99,10 @@ class CallbackResource
                     $userId = $users[0];
                 }
 
+                if (isset($hashData->userId) && $hashData->userId === 0) {
+                    $userId = $hashData->userId;
+                }
+
                 $user = $this->userManager->getUserById($userId);
                 if ($user === null) {
                     $this->logger->error('Track: user ' . $userId . 'not found');

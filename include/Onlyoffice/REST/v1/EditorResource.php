@@ -81,11 +81,13 @@ class EditorResource
         $params["document"]["key"] = FileUtility::GetKey($file);
         $params["document"]["title"] = $file->getTitle();
 
-        $params["editorConfig"]["lang"] = $user->getLanguageID();
-        $params["editorConfig"]["user"] = [
-            "id" => $userId,
-            "name" => $userName
-        ];
+        if ($userId !== 0) {
+            $params["editorConfig"]["lang"] = $user->getLanguageID();
+            $params["editorConfig"]["user"] = [
+                "id" => $userId,
+                "name" => $userName
+            ];
+        }
 
         $permissionManager = \Docman_PermissionsManager::instance($file->getGroupId());
 
@@ -93,7 +95,7 @@ class EditorResource
 
         if ($canEdit && $permissionManager->userCanWrite($user, $fileId)) {
             $params["document"]["permissions"]["edit"] = $haveEditPermissions;
-            $params["editorConfig"]["callbackUrl"] = $this->GetCallbackUrl($fileId);
+            $params["editorConfig"]["callbackUrl"] = $this->GetCallbackUrl($fileId, $userId);
         } else if ($permissionManager->userCanRead($user, $fileId)) {
             $params["editorConfig"]["mode"] = "view";
         } else {
@@ -108,7 +110,7 @@ class EditorResource
      * Url for download file directly
      *
      * @param int $fileId - file identifier
-     * @param string $userId - user identifier
+     * @param int $userId - user identifier
      */
     private function GetDownloadUrl($fileId, $userId): string
     {
@@ -127,12 +129,14 @@ class EditorResource
      * Url for sending status by document server
      *
      * @param int $fileId - file identifier
+     * @param int $userId - user identifier
      */
-    private function GetCallbackUrl($fileId): string
+    private function GetCallbackUrl($fileId, $userId): string
     {
         $params = [
             'action' => 'track',
-            'fileId' => $fileId
+            'fileId' => $fileId,
+            'userId' => $userId
         ];
 
         $hash = Crypt::GetHash($params);
