@@ -103,6 +103,11 @@ class EditorResource
             return ["error" => "Access denied"];
         }
 
+        if (!empty($this->appConfig->GetJwtSecret())) {
+            $token = \Firebase\JWT\JWT::encode($params, $this->appConfig->GetJwtSecret(), "HS256");
+            $params["token"] = $token;
+        }
+
         return $params;
     }
 
