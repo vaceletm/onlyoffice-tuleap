@@ -43,9 +43,11 @@ class SaveSettingsController implements DispatchableWithRequest, DispatchableWit
 
         $documentServerUrl = (string)$request->getValidated('document-server-url', 'string');
         $verifySelfSignedOff = (bool)$request->getValidated('verify-self-signed-off', 'uint');
+        $jwtSecret = (string)$request->getValidated('jwt-secret', 'string');
 
         $this->appConfig->SetDocumentServerUrl($documentServerUrl);
         $this->appConfig->SetVerifySelfSignedOff($verifySelfSignedOff);
+        $this->appConfig->SetJwtSecret($jwtSecret);
 
         $layout->addFeedback(
             Feedback::INFO,

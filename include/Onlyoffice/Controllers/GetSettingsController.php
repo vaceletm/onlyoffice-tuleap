@@ -61,7 +61,8 @@ class GetSettingsController implements DispatchableWithRequest, DispatchableWith
             new AdminPresenter(
                 $this->token,
                 $this->appConfig->GetDocumentServerUrl(),
-                $this->appConfig->GetVerifySelfSignedOff()
+                $this->appConfig->GetVerifySelfSignedOff(),
+                $this->appConfig->GetJwtSecret()
             )
         );
     }

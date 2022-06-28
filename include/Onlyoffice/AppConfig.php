@@ -18,6 +18,9 @@ class AppConfig
     #[ConfigKey("Verify self signed certificate off")]
     private const PLUGIN_ONLYOFFICE_VERIFY_SELF_SIGNED_OFF = 'plugin_onlyoffice_verify-self-signed-off';
 
+    #[ConfigKey("Jwt secret")]
+    private const PLUGIN_ONLYOFFICE_JWT_SECRET = 'plugin_onlyoffice_jwt_secret';
+
     public function __construct (
         ConfigDao $configDao
     ) {
@@ -42,6 +45,16 @@ class AppConfig
     public function SetVerifySelfSignedOff(bool $value): void
     {
         $this->configDao->save(self::PLUGIN_ONLYOFFICE_VERIFY_SELF_SIGNED_OFF, $value);
+    }
+
+    public function GetJwtSecret(): string
+    {
+        return \ForgeConfig::get(self::PLUGIN_ONLYOFFICE_JWT_SECRET);
+    }
+
+    public function SetJwtSecret(string $value): void
+    {
+        $this->configDao->save(self::PLUGIN_ONLYOFFICE_JWT_SECRET, $value);
     }
 
     public function GetFormats (): array

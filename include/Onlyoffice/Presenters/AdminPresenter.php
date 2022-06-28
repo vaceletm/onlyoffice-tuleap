@@ -23,13 +23,20 @@ class AdminPresenter
      */
     public $verifySelfSigned;
 
+    /**
+     * @var string
+     */
+    public $jwtSecret;
+
     public function __construct(
         CSRFSynchronizerToken $csrf_token,
         string $documentServerUrl,
-        bool $verifySelfSigned
+        bool $verifySelfSigned,
+        string $jwtSecret
     ) {
         $this->csrf_token = $csrf_token;
         $this->documentServerUrl = $documentServerUrl;
         $this->verifySelfSigned = $verifySelfSigned;
+        $this->jwtSecret = $jwtSecret;
     }
 }

@@ -50,6 +50,23 @@
                         </div>
                     </div>
 
+                    <div class="tlp-form-element">
+                        <label for="jwt-secret" class="tlp-label">
+                            {{# dgettext }}
+                                tuleap-onlyoffice | JWT Secret
+                            {{/ dgettext }}
+                        </label>
+                        <input
+                            id="jwt-secret"
+                            name="jwt-secret"
+                            class="tlp-input"
+                            type="string"
+                            min="0"
+                            size="50"
+                            value="{{ jwtSecret }}"
+                        >
+                    </div>
+
                     <div class="tlp-pane-section-submit">
                         <button class="tlp-button-primary" type="submit">
                             <i class="fa fa-save tlp-button-icon"></i>
