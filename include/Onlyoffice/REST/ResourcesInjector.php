@@ -13,12 +13,12 @@ class ResourcesInjector
     {
         $restler->addAPIClass(
             EditorResource::class,
-            "onlyoffice/editor"
+            'onlyoffice/editor'
         );
 
         $restler->addAPIClass(
             CallbackResource::class,
-            "onlyoffice/callback"
+            'onlyoffice/callback'
         );
     }
 }

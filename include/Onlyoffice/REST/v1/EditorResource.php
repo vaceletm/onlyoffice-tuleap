@@ -48,7 +48,7 @@ class EditorResource
      */
     public function config($fileId): array
     {
-        $this->logger->debug("Building config for: " . $fileId);
+        $this->logger->debug('Building config for: ' . $fileId);
 
         $user = $this->userManager->getCurrentUser();
         $userId = $user->getId();
@@ -57,7 +57,7 @@ class EditorResource
         $file = $this->itemFactory->getItemFromDb($fileId);
         if (empty($file)) {
             $this->logger->error('Config: file not found: ' . $fileId);
-            return ["error" => "File not found"];
+            return ['error' => 'File not found'];
         }
         $version = $file->getCurrentVersion();
 
@@ -67,46 +67,53 @@ class EditorResource
 
         $format = $formats[$fileExtension];
         if (empty($format)) {
-            $this->logger->error("Format does not support: " . $fileId);
-            return ["error" => "Format does not support"];
+            $this->logger->error('Format does not support: ' . $fileId);
+            return ['error' => 'Format does not support'];
         }
 
-        $params = [];
-        $params["type"] = "desktop";
-
-        $params["documentType"] = $format["type"];
-
-        $params["document"]["url"] = $this->GetDownloadUrl($fileId, $userId);
-        $params["document"]["fileType"] = $fileExtension;
-        $params["document"]["key"] = FileUtility::GetKey($file);
-        $params["document"]["title"] = $file->getTitle();
+        $key = FileUtility::GetKey($file);
+        $params = [
+            'document' => [
+                'url' => $this->GetDownloadUrl($fileId, $userId),
+                'fileType' => $fileExtension,
+                'key' => $key,
+                'title' => $file->getTitle()
+            ],
+            'documentType' => $format["type"],
+            'type' => 'desktop'
+        ];
 
         if ($userId !== 0) {
-            $params["editorConfig"]["lang"] = $user->getLanguageID();
-            $params["editorConfig"]["user"] = [
-                "id" => $userId,
-                "name" => $userName
+            $params['editorConfig'] = [
+                'lang' => $user->getLanguageID(),
+                'user' => [
+                    'id' => $userId,
+                    'name' => $userName
+                ]
             ];
         }
 
         $permissionManager = \Docman_PermissionsManager::instance($file->getGroupId());
 
         $canEdit = isset($format['edit']) && $format['edit'];
+        $editable = $permissionManager->userCanWrite($user, $fileId);
 
-        if ($canEdit && $permissionManager->userCanWrite($user, $fileId)) {
-            $params["document"]["permissions"]["edit"] = $haveEditPermissions;
-            $params["editorConfig"]["callbackUrl"] = $this->GetCallbackUrl($fileId, $userId);
+        $params['document']['permissions']['edit'] = $editable;
+        if ($canEdit && $editable) {
+            $params['editorConfig']['callbackUrl'] = $this->GetCallbackUrl($fileId, $userId);
         } else if ($permissionManager->userCanRead($user, $fileId)) {
-            $params["editorConfig"]["mode"] = "view";
+            $params['editorConfig']['mode'] = 'view';
         } else {
-            $this->logger->error("User " . $userId . " does not have permissions for " . $fileId);
-            return ["error" => "Access denied"];
+            $this->logger->error('User ' . $userId . ' does not have permissions for ' . $fileId);
+            return ['error' => 'Access denied'];
         }
 
         if (!empty($this->appConfig->GetJwtSecret())) {
-            $token = \Firebase\JWT\JWT::encode($params, $this->appConfig->GetJwtSecret(), "HS256");
-            $params["token"] = $token;
+            $token = \Firebase\JWT\JWT::encode($params, $this->appConfig->GetJwtSecret(), 'HS256');
+            $params['token'] = $token;
         }
+
+        $this->logger->debug('Configuration is buit for ' . $fileId . ' with key ' . $key);
 
         return $params;
     }

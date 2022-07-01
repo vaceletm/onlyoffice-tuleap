@@ -75,11 +75,11 @@ class CallbackResource
         list($hashData, $error) = Crypt::ReadHash($hash);
         if ($hashData === null) {
             $this->logger->error('Track: Error when decrypt hash: ' . $error);
-            return $this->responseFactory->createResponse(400);
+            throw new RestException(400, 'Invalid hash');
         }
         if ($hashData->action !== 'track') {
             $this->logger->error('Track: Invalid action');
-            return $this->responseFactory->createResponse(400);
+            throw new RestException(400, 'Invalid action');
         }
 
         $fileId = $hashData->fileId;
@@ -92,13 +92,13 @@ class CallbackResource
                     $payload = \Firebase\JWT\JWT::decode($token, new \Firebase\JWT\Key($this->appConfig->GetJwtSecret(), "HS256"));
                 } catch (\UnexpectedValueException $e) {
                     $this->logger->error('Track: Invalid jwt in body');
-                    return $this->responseFactory->createResponse(400);
+                    throw new RestException(403);
                 }
             } else {
                 $headers = getallheaders();
                 if (!isset($headers['Authorization'])) {
                     $this->logger->error('Track: jwt is empty');
-                    return $this->responseFactory->createResponse(400);
+                    throw new RestException(403);
                 }
                 
                 $header = substr($headers['Authorization'], strlen('Bearer '));
@@ -109,7 +109,7 @@ class CallbackResource
                     $payload = $decodedHeader->payload;
                 } catch (\UnexpectedValueException $e) {
                     $this->logger->error('Track: invalid jwt');
-                    return $this->responseFactory->createResponse(400);
+                    throw new RestException(403);
                 }
             }
 

@@ -36,7 +36,7 @@ class SaveSettingsController implements DispatchableWithRequest, DispatchableWit
 
     public function process(HTTPRequest $request, BaseLayout $layout, array $variables): void
     {
-        $this->logger->debug("ONLYOFFICE Save setting process");
+        $this->logger->debug('ONLYOFFICE Save setting process');
 
         $scrf_token = new CSRFSynchronizerToken($request->getFromServer('REQUEST_URI'));
         $scrf_token->check();
