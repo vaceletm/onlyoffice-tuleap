@@ -19,8 +19,8 @@ use Tuleap\Onlyoffice\Controller\DownloadController;
 use Tuleap\Onlyoffice\REST\ResourcesInjector;
 use Tuleap\Onlyoffice\AppConfig;
 
-require_once __DIR__ . '/autoload.php';
 require_once __DIR__ . '/../../docman/vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 require_once __DIR__ . '/../3rdparty/jwt/src/BeforeValidException.php';
 require_once __DIR__ . '/../3rdparty/jwt/src/ExpiredException.php';
@@ -44,7 +44,7 @@ class onlyofficePlugin extends Plugin implements PluginWithConfigKeys
         $this->addHook(CollectRoutesEvent::NAME);
         $this->addHook(Event::REST_RESOURCES);
         $this->addHook(Event::CONTENT_SECURITY_POLICY_SCRIPT_WHITELIST, 'allowResourse');
-        
+
         bindtextdomain('tuleap-onlyoffice', __DIR__ . '/../site-content');
     }
 
@@ -61,8 +61,8 @@ class onlyofficePlugin extends Plugin implements PluginWithConfigKeys
         return 'plugin_onlyoffice';
     }
 
-    /** 
-     * @see Event::CollectRoutesEvent 
+    /**
+     * @see Event::CollectRoutesEvent
      */
     public function collectRoutesEvent(CollectRoutesEvent $event) : void
     {
@@ -113,7 +113,7 @@ class onlyofficePlugin extends Plugin implements PluginWithConfigKeys
     }
 
     /**
-     * @see Event::SiteAdministrationAddOption 
+     * @see Event::SiteAdministrationAddOption
      */
     public function siteAdministrationAddOption(SiteAdministrationAddOption $addOption): void
     {
@@ -126,7 +126,7 @@ class onlyofficePlugin extends Plugin implements PluginWithConfigKeys
     }
 
     /**
-     * @see Event::BURNING_PARROT_GET_JAVASCRIPT_FILES 
+     * @see Event::BURNING_PARROT_GET_JAVASCRIPT_FILES
      */
     public function burning_parrot_get_javascript_files($params): void
     {
@@ -143,8 +143,8 @@ class onlyofficePlugin extends Plugin implements PluginWithConfigKeys
             }
     }
 
-    /** 
-     * @see Event::CONTENT_SECURITY_POLICY_SCRIPT_WHITELIST 
+    /**
+     * @see Event::CONTENT_SECURITY_POLICY_SCRIPT_WHITELIST
      */
     public function allowResourse(array $params)
     {
@@ -153,8 +153,8 @@ class onlyofficePlugin extends Plugin implements PluginWithConfigKeys
         }
     }
 
-    /** 
-     * @see Event::REST_RESOURCES 
+    /**
+     * @see Event::REST_RESOURCES
      */
     public function restResources(array $params)
     {
